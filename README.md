@@ -82,6 +82,15 @@ npm run db:migrate            # cria as tabelas (clients, reports)
 npm run migrate-existing-data # importa data/joybeauty-2026-06.json existente
 ```
 
+**Sem Node.js instalado?** As mesmas duas ações existem como rotas protegidas
+por login — depois de configurar o banco na Vercel (veja abaixo), faça login
+no site e visite, uma vez cada:
+
+- `/api/admin/migrate` — cria as tabelas
+- `/api/admin/seed` — importa `data/joybeauty-2026-06.json`
+
+Ambas são seguras de visitar mais de uma vez (não duplicam dados).
+
 ## Publicando na Vercel
 
 1. Conecte o repositório na Vercel (Framework Preset: **Next.js**, detectado
