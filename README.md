@@ -1,69 +1,105 @@
 # Relatórios Timing
 
-Gerador de páginas de relatório mensal (estilo do painel Lovable do Estúdio Timing),
-sem depender de nenhuma plataforma. Cada relatório é um arquivo de dados (`.json`) que
-vira uma página HTML independente, pronta para enviar ao cliente por link.
+Portal interno do Estúdio Timing: login por senha única, painel de clientes e
+geração de relatórios de redes sociais a partir de upload de planilhas/PDFs do
+Meta Business Suite. Cada relatório publicado vira uma página HTML pública,
+pronta para enviar ao cliente por link — sem exigir login.
 
-## Estrutura
+## Arquitetura
+
+Aplicação Next.js (App Router) hospedada na Vercel, com Postgres (Vercel
+Postgres/Neon) guardando clientes e relatórios.
 
 ```
 relatorios-timing/
-├── data/                  → um arquivo .json por relatório (cliente + período)
-├── templates/report.html  → o design do relatório (edite aqui para mudar o visual)
-├── generate.js            → lê /data e gera as páginas em /output
-├── output/                → páginas HTML prontas (geradas automaticamente)
-└── package.json
+├── middleware.ts              → protege as rotas internas (tudo exceto /clientSlug/periodoSlug)
+├── src/
+│   ├── app/
+│   │   ├── login/                          → tela de login (senha única)
+│   │   ├── projetos/                       → painel interno (protegido)
+│   │   │   ├── page.tsx                    → lista de clientes
+│   │   │   ├── novo/                       → criar cliente
+│   │   │   └── [clientSlug]/
+│   │   │       ├── page.tsx                → detalhe do cliente + relatórios
+│   │   │       ├── novo-relatorio/         → upload de planilhas/PDFs
+│   │   │       └── [reportId]/revisar/     → tela de revisão com prévia ao vivo
+│   │   ├── [clientSlug]/[periodSlug]/      → página PÚBLICA do relatório final
+│   │   └── api/
+│   │       ├── auth/login, auth/logout
+│   │       ├── clients/                    → criar cliente
+│   │       └── reports/                    → criar rascunho, upload csv/pdf, revisar, publicar
+│   ├── db/                                 → schema Drizzle (clients, reports) + queries
+│   ├── lib/
+│   │   ├── report-html.ts                  → gera o HTML do relatório (mesmo visual de sempre)
+│   │   ├── parse-csv.ts                    → lê os CSVs do Meta Business Suite (UTF-16LE)
+│   │   ├── extract-pdf.ts                  → lê os PDFs via API da Anthropic (Claude)
+│   │   ├── auth.ts / session.ts            → senha e sessão (cookie assinado)
+│   └── templates/report-template.ts        → o design do relatório (edite aqui para mudar o visual)
+├── data/, generate.js, output/             → gerador estático antigo, mantido como referência/rollback
+└── scripts/
+    ├── run-migrations.ts                   → cria as tabelas no Postgres
+    └── migrate-existing-data.ts            → importa data/*.json (formato antigo) para o banco
 ```
 
-## Como gerar um novo relatório
+## Fluxo de um relatório novo
 
-1. Copie `data/joybeauty-2026-06.json` e renomeie (ex: `data/joybeauty-2026-07.json`).
-2. Edite os campos com os números do mês (veja a lista abaixo).
-3. Rode:
-   ```bash
-   npm run generate
-   ```
-4. A página aparece em `output/<clientSlug>/<periodSlug>/index.html`. Abra
-   direto no navegador para conferir antes de publicar.
+1. Entre em `/` com a senha do Estúdio.
+2. Em **Projetos**, abra o cliente (ou crie um novo em "+ Novo cliente").
+3. Clique em **"+ Gerar novo relatório"**, informe o período (o identificador
+   de período deve ser `AAAA-MM`, ex: `2026-07`, para bater com os meses das
+   planilhas) e envie:
+   - As planilhas `.csv` exportadas do Meta Business Suite (Alcance,
+     Interações, Visualizações) — lidas automaticamente.
+   - Os PDFs do Meta Business Suite (resumo do painel) — lidos via IA
+     (Claude), preenchendo os totais do período quando visíveis no PDF.
+4. Você cai na tela de **revisão**: os campos que não têm fonte automática
+   (posts em destaque, cliques em link, visitas ao perfil, seguidores
+   ganhos, distribuição por formato, ideias do próximo mês) ficam para
+   preencher à mão. Clique em "Atualizar prévia" para ver o resultado exato.
+5. **Salvar rascunho** guarda o progresso sem publicar. **Publicar relatório**
+   deixa a página no ar em `/clientSlug/periodoSlug`, pública, sem login.
 
-### Campos do arquivo de dados
+## Configuração local (requer Node.js instalado)
 
-- `clientSlug` — usado na URL (ex: `joybeauty` → `/joybeauty/2026-07`)
-- `clientName`, `niche`, `instagramHandle`, `periodLabel`, `periodSlug`
-- `months`, `reachSeries`, `engagementSeries` — dados dos 2 gráficos
-- `stats` — os 8 números do período
-- `topPosts`, `followerPosts` — rankings de conteúdo
-- `linkClicksTotal`, `profileVisitsTotal`
-- `formatDistribution` — pills de formato (Reels, Carrossel, etc.)
-- `ideaBlocks` — os blocos de ideias/pautas do próximo mês
+```bash
+npm install
+npm run dev
+```
 
-## Publicando o site (recomendado: Vercel)
+Variáveis de ambiente necessárias (`.env.local`):
 
-1. Suba esta pasta para um repositório no GitHub (o Claude Code pode fazer isso por você).
-2. Crie uma conta em [vercel.com](https://vercel.com) (gratuito) e importe o repositório.
-3. Configure o "Output Directory" da Vercel como `output`.
-4. A cada `npm run generate` + novo commit, o site atualiza sozinho.
+```
+INTERNAL_PASSWORD=senha-da-equipe
+SESSION_SECRET=uma-string-aleatoria-longa
+ANTHROPIC_API_KEY=sk-ant-...
+POSTGRES_URL=...   # injetada automaticamente ao conectar Vercel Postgres/Neon
+```
 
-(Netlify funciona da mesma forma, como alternativa.)
+Depois de configurar o banco:
 
-## Conectando o domínio estudiotiming.com.br
+```bash
+npm run db:migrate            # cria as tabelas (clients, reports)
+npm run migrate-existing-data # importa data/joybeauty-2026-06.json existente
+```
 
-Você não precisa mudar o domínio de registrador. No painel do RegistroBR:
+## Publicando na Vercel
 
-1. Decida o subdomínio, por exemplo `relatorios.estudiotiming.com.br`.
-2. Na Vercel/Netlify, adicione esse domínio ao projeto — a plataforma vai te
-   mostrar um endereço tipo `cname.vercel-dns.com`.
-3. No RegistroBR, em "Zona DNS" do domínio, crie um registro:
-   - Tipo: `CNAME`
-   - Nome/Host: `relatorios`
-   - Valor/Destino: o endereço que a Vercel/Netlify te deu
-4. Aguarde a propagação (minutos a poucas horas) e acesse
-   `relatorios.estudiotiming.com.br` para conferir.
+1. Conecte o repositório na Vercel (Framework Preset: **Next.js**, detectado
+   automaticamente — remova qualquer Build Command/Output Directory
+   customizado que tenha ficado do gerador estático antigo).
+2. Na aba **Storage**, conecte um banco **Postgres** (Neon) ao projeto — isso
+   injeta `POSTGRES_URL` e variáveis relacionadas automaticamente.
+3. Em **Settings → Environment Variables**, adicione `INTERNAL_PASSWORD`,
+   `SESSION_SECRET` e `ANTHROPIC_API_KEY`.
+4. Rode as migrations e a importação dos dados existentes (uma vez, com
+   `POSTGRES_URL` apontando para o banco de produção).
+5. Domínio `relatorios.estudiotiming.com.br` continua igual — não precisa
+   mexer no DNS.
 
-## Próximos passos possíveis (com o Claude Code)
+## Próximos passos possíveis
 
-- Página inicial em `/` listando todos os clientes e períodos disponíveis
-- Formulário simples para editar os dados sem mexer em JSON diretamente
-- Autenticação por cliente (cada um só vê o próprio relatório)
-- Trocar os arquivos `.json` por um banco de dados (ex: Supabase), permitindo
-  editar os relatórios direto do navegador, sem rodar comandos
+- Página inicial listando todos os clientes/períodos publicados
+- Contas individuais em vez de senha única
+- Fonte automática para cliques em link, visitas ao perfil e seguidores
+  ganhos (hoje ficam manuais, pois os exports enviados não trazem esses
+  números)
