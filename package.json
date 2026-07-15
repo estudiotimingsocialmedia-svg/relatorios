@@ -1,0 +1,10 @@
+{
+  "name": "relatorios-timing",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Gerador de páginas de relatório de redes sociais para clientes do Estúdio Timing.",
+  "scripts": {
+    "generate": "node generate.js"
+  }
+}

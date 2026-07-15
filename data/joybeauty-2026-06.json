@@ -1,0 +1,60 @@
+{
+  "clientSlug": "joybeauty",
+  "clientName": "Joy Beauty",
+  "niche": "Salão de Beleza",
+  "instagramHandle": "joybeautyfloripa",
+  "periodLabel": "01/06/2026 — 30/06/2026",
+  "periodSlug": "2026-06",
+  "months": ["Fev", "Mar", "Abr", "Mai", "Jun", "Jul"],
+  "reachSeries": [28000, 31000, 36000, 41000, 47000, 52400],
+  "engagementSeries": [1400, 1650, 2100, 2480, 2790, 3180],
+  "stats": [
+    { "label": "Conteúdos publicados", "value": "14" },
+    { "label": "Alcance total", "value": "52,4 mil" },
+    { "label": "Engajamento", "value": "3.180" },
+    { "label": "Taxa de engajamento", "value": "6,1%" },
+    { "label": "Visitas ao perfil", "value": "890" },
+    { "label": "Cliques em link", "value": "214" },
+    { "label": "Seguidores ganhos", "value": "+186" },
+    { "label": "Impressões", "value": "68,9 mil" }
+  ],
+  "topPosts": [
+    { "format": "Reels", "caption": "Bastidores do atendimento — dia de transformação", "statsLine": "612 curtidas · 48 comentários · 96 salvos", "total": "812" },
+    { "format": "Carrossel", "caption": "5 mitos sobre hidratação capilar", "statsLine": "430 curtidas · 31 comentários · 140 salvos", "total": "601" },
+    { "format": "Reels", "caption": "Depoimento de cliente — resultado em 3 sessões", "statsLine": "380 curtidas · 22 comentários · 58 salvos", "total": "460" }
+  ],
+  "followerPosts": [
+    { "format": "Reels", "caption": "Bastidores do atendimento — dia de transformação", "statsLine": "alcance 9,8 mil · não seguidores 71%", "total": "+62" },
+    { "format": "Carrossel", "caption": "5 mitos sobre hidratação capilar", "statsLine": "alcance 7,1 mil · não seguidores 64%", "total": "+41" }
+  ],
+  "linkClicksTotal": "214",
+  "profileVisitsTotal": "890",
+  "formatDistribution": [
+    { "label": "Reels", "count": 8 },
+    { "label": "Carrossel", "count": 4 },
+    { "label": "Feed estático", "count": 2 }
+  ],
+  "ideaBlocks": [
+    {
+      "label": "Ideias de conteúdo",
+      "cards": [
+        { "title": "Passo a passo de um procedimento popular", "tag": "Carrossel", "desc": "Carrossel educativo detalhando etapas de um serviço (ex: coloração, hidratação), quebrando mitos e gerando confiança." },
+        { "title": "Bastidores da equipe", "tag": "Reels", "desc": "Vídeos curtos do dia a dia do salão, mostrando a equipe se preparando e o clima do ambiente. Humaniza a marca." }
+      ]
+    },
+    {
+      "label": "Temas em alta",
+      "cards": [
+        { "title": "Beleza consciente e sustentável", "desc": "Produtos orgânicos e práticas sustentáveis adotadas pelo salão." },
+        { "title": "Saúde capilar e do couro cabeludo", "desc": "Conteúdo educativo sobre queda, caspa e oleosidade, desmistificando a saúde da raiz." }
+      ]
+    },
+    {
+      "label": "Possibilidades comerciais",
+      "cards": [
+        { "title": "Clube de assinatura de cuidados", "desc": "Pacotes mensais de serviços com preço diferenciado, incentivando recorrência." },
+        { "title": "Workshops digitais pagos", "desc": "Masterclasses online sobre tópicos específicos, com interação ao vivo e certificado." }
+      ]
+    }
+  ]
+}
